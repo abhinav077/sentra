@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  OrganizationSwitcher,
   Show,
   SignInButton,
   SignUpButton,
@@ -26,6 +27,7 @@ export default function Page() {
           </Show>
           <Show when="signed-in">
             <UserButton />
+            <OrganizationSwitcher />
           </Show>
         </div>
       </header>
