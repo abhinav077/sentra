@@ -31,6 +31,12 @@ pnpm-debug.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local MCP configuration and credentials
+/.codex/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
