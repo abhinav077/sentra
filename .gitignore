@@ -34,6 +34,9 @@ pnpm-debug.log*
 # local MCP configuration and credentials
 /.codex/
 
+# local Superpowers planning documents
+/docs/superpowers/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

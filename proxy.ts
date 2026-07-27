@@ -1,7 +1,11 @@
 import { clerkMiddleware } from "@clerk/nextjs/server"
 
 export default clerkMiddleware(async (auth, request) => {
-  if (request.nextUrl.pathname === "/test") {
+  const isPublicRoute = /^\/(sign-in|sign-up)(\/|$)/.test(
+    request.nextUrl.pathname
+  )
+
+  if (!isPublicRoute) {
     await auth.protect()
   }
 })
