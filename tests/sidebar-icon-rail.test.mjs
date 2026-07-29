@@ -58,12 +58,12 @@ test("dashboard home page has no duplicate header", async () => {
   assert.doesNotMatch(dashboardPage, /UserButton/)
 })
 
-test("new workflow actions trigger a toast", async () => {
+test("failed workflow creation reports an error toast", async () => {
   const dashboardPage = await readFile(dashboardPagePath, "utf8")
   const workflowNav = await readFile(workflowNavPath, "utf8")
 
   assert.match(dashboardPage, /from "sonner"/)
   assert.match(dashboardPage, /toast\.info\(/)
   assert.match(workflowNav, /from "sonner"/)
-  assert.match(workflowNav, /toast\.info\(/)
+  assert.match(workflowNav, /toast\.error\(/)
 })

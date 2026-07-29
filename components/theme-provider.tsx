@@ -1,24 +1,106 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
+
+type Theme = "light" | "dark" | "system"
+type ResolvedTheme = Exclude<Theme, "system">
+
+type ThemeContextValue = {
+  theme: Theme
+  resolvedTheme: ResolvedTheme
+  setTheme: (theme: Theme) => void
+}
+
+type ThemeProviderProps = {
+  children: React.ReactNode
+  defaultTheme?: Theme
+  storageKey?: string
+}
+
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined
+)
+
+function getSystemTheme(): ResolvedTheme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light"
+}
+
+function applyTheme(theme: Theme): ResolvedTheme {
+  const resolvedTheme = theme === "system" ? getSystemTheme() : theme
+  const root = document.documentElement
+
+  root.classList.remove("light", "dark")
+  root.classList.add(resolvedTheme)
+  root.style.colorScheme = resolvedTheme
+
+  return resolvedTheme
+}
+
+function getInitialTheme(defaultTheme: Theme, storageKey: string): Theme {
+  if (typeof window === "undefined") {
+    return defaultTheme
+  }
+
+  const storedTheme = window.localStorage.getItem(storageKey)
+  return storedTheme === "light" ||
+    storedTheme === "dark" ||
+    storedTheme === "system"
+    ? storedTheme
+    : defaultTheme
+}
 
 function ThemeProvider({
   children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+  defaultTheme = "system",
+  storageKey = "theme",
+}: ThemeProviderProps) {
+  const [theme, setThemeState] = React.useState<Theme>(() =>
+    getInitialTheme(defaultTheme, storageKey)
+  )
+  const [resolvedTheme, setResolvedTheme] =
+    React.useState<ResolvedTheme>("light")
+
+  React.useEffect(() => {
+    const updateTheme = () => setResolvedTheme(applyTheme(theme))
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+
+    updateTheme()
+    mediaQuery.addEventListener("change", updateTheme)
+
+    return () => mediaQuery.removeEventListener("change", updateTheme)
+  }, [theme])
+
+  const setTheme = React.useCallback(
+    (nextTheme: Theme) => {
+      setThemeState(nextTheme)
+      window.localStorage.setItem(storageKey, nextTheme)
+    },
+    [storageKey]
+  )
+
+  const value = React.useMemo(
+    () => ({ theme, resolvedTheme, setTheme }),
+    [theme, resolvedTheme, setTheme]
+  )
+
   return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      {...props}
-    >
+    <ThemeContext.Provider value={value}>
       <ThemeHotkey />
       {children}
-    </NextThemesProvider>
+    </ThemeContext.Provider>
   )
+}
+
+function useTheme() {
+  const context = React.useContext(ThemeContext)
+
+  if (!context) {
+    throw new Error("useTheme must be used within ThemeProvider")
+  }
+
+  return context
 }
 
 function isTypingTarget(target: EventTarget | null) {
@@ -68,4 +150,4 @@ function ThemeHotkey() {
   return null
 }
 
-export { ThemeProvider }
+export { ThemeProvider, useTheme }
