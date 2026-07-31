@@ -15,6 +15,10 @@ const rightSidebarPath = new URL(
   "../features/workflows/components/right-sidebar.tsx",
   import.meta.url
 )
+const canvasPath = new URL(
+  "../features/workflows/components/canvas.tsx",
+  import.meta.url
+)
 const workflowPagePath = new URL(
   "../app/(dashboard)/workflows/[id]/page.tsx",
   import.meta.url
@@ -58,10 +62,11 @@ test("workflow nav links database workflows and marks the current one active", a
 })
 
 test("workflow page renders the rem-sized editor shell", async () => {
-  const [workflowShell, workflowPage, rightSidebar] = await Promise.all([
+  const [workflowShell, workflowPage, rightSidebar, canvas] = await Promise.all([
     readFile(workflowShellPath, "utf8"),
     readFile(workflowPagePath, "utf8"),
     readFile(rightSidebarPath, "utf8"),
+    readFile(canvasPath, "utf8"),
   ])
 
   assert.match(workflowShell, /"use client"/)
@@ -70,19 +75,20 @@ test("workflow page renders the rem-sized editor shell", async () => {
   assert.match(workflowShell, /className="size-full"/)
   assert.match(workflowShell, /minSize="30rem"/)
   assert.match(workflowShell, /orientation="vertical"/)
-  assert.match(workflowShell, /minSize="18rem"/)
   assert.match(workflowShell, /defaultSize="8rem"/)
   assert.match(workflowShell, /minSize="6rem"/)
   assert.match(workflowShell, /defaultSize="16rem"/)
   assert.match(workflowShell, /minSize="14rem"/)
   assert.match(workflowShell, /maxSize="36rem"/)
-  assert.match(workflowShell, /Canvas/)
+  assert.match(workflowShell, /import \{ Canvas \} from "\.\/canvas"/)
+  assert.match(workflowShell, /<Canvas \/>/)
   assert.match(workflowShell, /Logs/)
   assert.match(workflowShell, /<RightSidebar \/>/)
   assert.match(rightSidebar, /^"use client"/)
   assert.match(rightSidebar, /useRealtimeRun/)
   assert.match(rightSidebar, /runWorkflowAction/)
   assert.match(rightSidebar, /status/)
+  assert.match(canvas, /minSize="18rem"/)
   assert.match(
     workflowPage,
     /import \{ WorkflowShell \} from "@\/features\/workflows\/components\/workflow-shell"/

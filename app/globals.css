@@ -1,9 +1,16 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@clerk/ui/themes/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
+
+.react-flow {
+  --xy-background-color: var(--background);
+  --xy-edge-stroke: var(--muted-foreground);
+  --xy-connectionline-stroke: var(--muted-foreground);
+}
 
 @theme inline {
   --font-heading: var(--font-sans);
