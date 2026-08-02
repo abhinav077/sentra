@@ -1,21 +1,23 @@
 "use client"
 
-import { useCallback, useEffect } from "react"
+import { useEffect } from "react"
 import {
-  addEdge,
   ConnectionLineType,
-  type Connection,
   Controls,
+  type Edge,
   ReactFlow,
-  useEdgesState,
-  useNodesState,
 } from "@xyflow/react"
+import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow"
 
 import { useTheme } from "@/components/theme-provider"
 import type { StepNodeType } from "@/features/workflows/nodes/nodes-registery"
 import type { WorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
 import { AvoidingEdge } from "./avoiding-edge"
 import { StepNode } from "./step-nodes"
+
+import "@xyflow/react/dist/style.css";
+import "@liveblocks/react-ui/styles.css";
+import "@liveblocks/react-flow/styles.css";
 
 const nodeTypes = { step: StepNode }
 const edgeTypes = { avoiding: AvoidingEdge }
@@ -34,20 +36,17 @@ export function CanvasFlow({
   saveGraph,
 }: CanvasFlowProps) {
   const { resolvedTheme } = useTheme()
-  const [nodes, , onNodesChange] = useNodesState<StepNodeType>(
-    initialGraph.nodes
-  )
-  const [edges, setEdges, onEdgesChange] = useEdgesState(
-    initialGraph.edges.map((edge) => ({ ...edge, type: "avoiding" }))
-  )
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((edgesSnapshot) =>
-        addEdge({ ...connection, type: "avoiding" }, edgesSnapshot)
-      )
-    },
-    [setEdges]
-  )
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
+    useLiveblocksFlow<StepNodeType, Edge>({
+      suspense: true,
+      nodes: { initial: initialGraph.nodes },
+      edges: {
+        initial: initialGraph.edges.map((edge) => ({
+          ...edge,
+          type: "avoiding",
+        })),
+      },
+    })
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -66,6 +65,7 @@ export function CanvasFlow({
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      onDelete={onDelete}
       defaultEdgeOptions={{ type: "avoiding" }}
       connectionLineType={ConnectionLineType.SmoothStep}
       connectionLineStyle={connectionLineStyle}
@@ -74,6 +74,7 @@ export function CanvasFlow({
       maxZoom={1}
     >
       <Controls />
+      <Cursors />
     </ReactFlow>
   )
 }

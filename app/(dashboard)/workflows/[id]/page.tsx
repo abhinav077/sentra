@@ -5,6 +5,7 @@ import { updateWorkflowGraphAction } from "@/features/workflows/action"
 import { WorkflowShell } from "@/features/workflows/components/workflow-shell"
 import { getWorkflow } from "@/features/workflows/data"
 import { getWorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
+import { Room } from "@/features/workflows/components/room"
 
 export default async function WorkflowPage({
   params,
@@ -25,10 +26,12 @@ export default async function WorkflowPage({
   }
 
   return (
+    <Room roomId={id}>
     <WorkflowShell
       workflowId={id}
       initialGraph={getWorkflowGraph(workflow.graph)}
       saveGraph={updateWorkflowGraphAction}
     />
+    </Room>
   )
 }
