@@ -1,10 +1,12 @@
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
+import type { WorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
+
 export const workflows = pgTable("workflows", {
   id: uuid("id").primaryKey().defaultRandom(),
   orgId: text("org_id").notNull(),
   name: text("name").notNull(),
-  graph: jsonb("graph"),
+  graph: jsonb("graph").$type<WorkflowGraph>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })

@@ -23,12 +23,20 @@ test("canvas loads the layout-dependent React Flow surface only in the browser",
   assert.match(canvas, /import dynamic from "next\/dynamic"/)
   assert.match(canvas, /import\("\.\/canvas-flow"\)/)
   assert.match(canvas, /ssr: false/)
-  assert.match(canvas, /<CanvasFlow \/>/)
+  assert.match(canvas, /<CanvasFlow\s+workflowId=\{workflowId\}/)
   assert.match(canvasFlow, /^"use client"/)
   assert.match(canvasFlow, /from "@xyflow\/react"/)
+  assert.match(canvasFlow, /import \{ StepNode \} from "\.\/step-nodes"/)
+  assert.match(canvasFlow, /StepNodeType/)
+  assert.match(canvasFlow, /WorkflowGraph/)
+  assert.match(canvasFlow, /import \{ AvoidingEdge \} from "\.\/avoiding-edge"/)
+  assert.match(canvasFlow, /const nodeTypes = \{ step: StepNode \}/)
+  assert.match(canvasFlow, /const edgeTypes = \{ avoiding: AvoidingEdge \}/)
   assert.match(canvasFlow, /from "@\/components\/theme-provider"/)
   assert.match(canvasFlow, /const \{ resolvedTheme \} = useTheme\(\)/)
   assert.match(canvasFlow, /<ReactFlow/)
+  assert.match(canvasFlow, /nodeTypes=\{nodeTypes\}/)
+  assert.match(canvasFlow, /edgeTypes=\{edgeTypes\}/)
   assert.match(canvasFlow, /nodes=\{nodes\}/)
   assert.match(canvasFlow, /edges=\{edges\}/)
   assert.match(canvasFlow, /onNodesChange=\{onNodesChange\}/)
@@ -36,8 +44,13 @@ test("canvas loads the layout-dependent React Flow surface only in the browser",
   assert.match(canvasFlow, /onConnect=\{onConnect\}/)
   assert.match(
     canvasFlow,
+    /addEdge\(\{ \.\.\.connection, type: "avoiding" \},\s+edgesSnapshot\)/
+  )
+  assert.match(
+    canvasFlow,
     /connectionLineType=\{ConnectionLineType\.SmoothStep\}/
   )
+  assert.match(canvasFlow, /defaultEdgeOptions=\{\{ type: "avoiding" \}\}/)
   assert.match(canvasFlow, /connectionLineStyle=\{connectionLineStyle\}/)
   assert.match(canvasFlow, /colorMode=\{resolvedTheme\}/)
   assert.match(canvasFlow, /maxZoom=\{1\}/)

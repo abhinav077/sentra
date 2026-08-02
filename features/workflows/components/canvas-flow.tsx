@@ -1,46 +1,72 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import {
   addEdge,
   ConnectionLineType,
   type Connection,
   Controls,
-  type Edge,
-  type Node,
   ReactFlow,
   useEdgesState,
   useNodesState,
 } from "@xyflow/react"
 
 import { useTheme } from "@/components/theme-provider"
+import type { StepNodeType } from "@/features/workflows/nodes/nodes-registery"
+import type { WorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
+import { AvoidingEdge } from "./avoiding-edge"
+import { StepNode } from "./step-nodes"
 
-const initialNodes: Node[] = [
-  { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-]
+const nodeTypes = { step: StepNode }
+const edgeTypes = { avoiding: AvoidingEdge }
 
-const initialEdges: Edge[] = [{ id: "n1-n2", source: "n1", target: "n2" }]
 const connectionLineStyle = { stroke: "var(--xy-connectionline-stroke)" }
 
-export function CanvasFlow() {
+type CanvasFlowProps = {
+  workflowId: string
+  initialGraph: WorkflowGraph
+  saveGraph: (workflowId: string, graph: WorkflowGraph) => Promise<void>
+}
+
+export function CanvasFlow({
+  workflowId,
+  initialGraph,
+  saveGraph,
+}: CanvasFlowProps) {
   const { resolvedTheme } = useTheme()
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [nodes, , onNodesChange] = useNodesState<StepNodeType>(
+    initialGraph.nodes
+  )
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    initialGraph.edges.map((edge) => ({ ...edge, type: "avoiding" }))
+  )
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((edgesSnapshot) => addEdge(connection, edgesSnapshot))
+      setEdges((edgesSnapshot) =>
+        addEdge({ ...connection, type: "avoiding" }, edgesSnapshot)
+      )
     },
     [setEdges]
   )
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      void saveGraph(workflowId, { nodes, edges })
+    }, 300)
+
+    return () => window.clearTimeout(timeout)
+  }, [edges, nodes, saveGraph, workflowId])
 
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      defaultEdgeOptions={{ type: "avoiding" }}
       connectionLineType={ConnectionLineType.SmoothStep}
       connectionLineStyle={connectionLineStyle}
       colorMode={resolvedTheme}

@@ -12,10 +12,17 @@ test("workflow action creates an org workflow and redirects to it", async () => 
   assert.match(action, /from "next\/cache"/)
   assert.match(action, /from "next\/navigation"/)
   assert.match(action, /from "\.\/data"/)
-  assert.match(action, /export async function createWorkflowAction\(name: string\)/)
+  assert.match(
+    action,
+    /export async function createWorkflowAction\(name: string\)/
+  )
   assert.match(action, /const \{ orgId \} = await auth\(\)/)
   assert.match(action, /if \(!orgId\)/)
-  assert.match(action, /await createWorkflow\(orgId, name\)/)
+  assert.match(action, /from "\.\/nodes\/workflow-graph"/)
+  assert.match(
+    action,
+    /await createWorkflow\(orgId, name, createStarterGraph\(\)\)/
+  )
   assert.match(action, /revalidatePath\("\/workflows", "layout"\)/)
   assert.match(action, /redirect\(`\/workflows\/\$\{workflow\.id\}`\)/)
 })

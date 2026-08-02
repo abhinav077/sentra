@@ -31,7 +31,10 @@ test("sidebar loads workflows for the active organization", async () => {
   assert.match(appSidebar, /from "@\/features\/workflows\/data"/)
   assert.match(appSidebar, /from "@\/features\/workflows\/action"/)
   assert.match(appSidebar, /const \{ orgId \} = await auth\(\)/)
-  assert.match(appSidebar, /const workflows = orgId \? await listWorkflows\(orgId\) : \[\]/)
+  assert.match(
+    appSidebar,
+    /const workflows = orgId \? await listWorkflows\(orgId\) : \[\]/
+  )
   assert.match(
     appSidebar,
     /<WorkflowNav\s+workflows=\{workflows\}\s+createWorkflow=\{createWorkflowAction\}\s+\/>/
@@ -62,12 +65,14 @@ test("workflow nav links database workflows and marks the current one active", a
 })
 
 test("workflow page renders the rem-sized editor shell", async () => {
-  const [workflowShell, workflowPage, rightSidebar, canvas] = await Promise.all([
-    readFile(workflowShellPath, "utf8"),
-    readFile(workflowPagePath, "utf8"),
-    readFile(rightSidebarPath, "utf8"),
-    readFile(canvasPath, "utf8"),
-  ])
+  const [workflowShell, workflowPage, rightSidebar, canvas] = await Promise.all(
+    [
+      readFile(workflowShellPath, "utf8"),
+      readFile(workflowPagePath, "utf8"),
+      readFile(rightSidebarPath, "utf8"),
+      readFile(canvasPath, "utf8"),
+    ]
+  )
 
   assert.match(workflowShell, /"use client"/)
   assert.match(workflowShell, /from "@\/components\/ui\/resizable"/)
@@ -81,7 +86,7 @@ test("workflow page renders the rem-sized editor shell", async () => {
   assert.match(workflowShell, /minSize="14rem"/)
   assert.match(workflowShell, /maxSize="36rem"/)
   assert.match(workflowShell, /import \{ Canvas \} from "\.\/canvas"/)
-  assert.match(workflowShell, /<Canvas \/>/)
+  assert.match(workflowShell, /<Canvas\s+initialGraph=\{initialGraph\}/)
   assert.match(workflowShell, /Logs/)
   assert.match(workflowShell, /<RightSidebar \/>/)
   assert.match(rightSidebar, /^"use client"/)
@@ -89,9 +94,16 @@ test("workflow page renders the rem-sized editor shell", async () => {
   assert.match(rightSidebar, /runWorkflowAction/)
   assert.match(rightSidebar, /status/)
   assert.match(canvas, /minSize="18rem"/)
+  assert.match(canvas, /initialGraph: WorkflowGraph/)
   assert.match(
     workflowPage,
     /import \{ WorkflowShell \} from "@\/features\/workflows\/components\/workflow-shell"/
   )
-  assert.match(workflowPage, /<WorkflowShell workflowId=\{id\} \/>/)
+  assert.match(workflowPage, /from "@clerk\/nextjs\/server"/)
+  assert.match(workflowPage, /getWorkflow\(orgId, id\)/)
+  assert.match(workflowShell, /initialGraph: WorkflowGraph/)
+  assert.match(
+    workflowPage,
+    /initialGraph=\{getWorkflowGraph\(workflow\.graph\)\}/
+  )
 })
