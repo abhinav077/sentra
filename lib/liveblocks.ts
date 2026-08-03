@@ -1,5 +1,11 @@
 import { Liveblocks } from "@liveblocks/node"
 
-export const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
-})
+let liveblocks: Liveblocks | undefined
+
+export function getLiveblocks() {
+  liveblocks ??= new Liveblocks({
+    secret: process.env.LIVEBLOCKS_SECRET_KEY!,
+  })
+
+  return liveblocks
+}

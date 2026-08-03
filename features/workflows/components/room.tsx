@@ -6,6 +6,7 @@ import {
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense"
+import { Spinner } from "@/components/ui/spinner"
 
 export function Room({
   roomId,
@@ -17,7 +18,10 @@ export function Room({
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks/auth" throttle={16}>
       <RoomProvider id={roomId}>
-        <ClientSideSuspense fallback={<div>Loading…</div>}>
+        <ClientSideSuspense fallback={
+          <div className="flex min-h-svh items-center justify-center">
+            <Spinner className="flex min-h-svh items-center justify-center" />
+          </div>}>
           {children}
         </ClientSideSuspense>
       </RoomProvider>

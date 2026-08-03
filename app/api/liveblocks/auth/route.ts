@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
-import { liveblocks } from "@/lib/liveblocks"
+import { getLiveblocks } from "@/lib/liveblocks"
 
 export async function POST() {
   const { orgId, userId } = await auth()
@@ -8,10 +8,12 @@ export async function POST() {
     return new Response("Unauthorized", { status: 401 })
   }
 
+  const liveblocks = getLiveblocks()
   const { body, status } = await liveblocks.identifyUser(
     {
       userId,
       groupIds: [orgId],
+      organizationId: orgId,
     },
     {
       userInfo: { name: userId },
