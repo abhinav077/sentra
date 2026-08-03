@@ -6,6 +6,7 @@ import { WorkflowShell } from "@/features/workflows/components/workflow-shell"
 import { getWorkflow } from "@/features/workflows/data"
 import { getWorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
 import { Room } from "@/features/workflows/components/room"
+import { liveblocks } from "@/lib/liveblocks"
 
 export default async function WorkflowPage({
   params,
@@ -25,13 +26,20 @@ export default async function WorkflowPage({
     notFound()
   }
 
+  await liveblocks.getOrCreateRoom(id, {
+    defaultAccesses: [],
+    groupsAccesses: {
+      [orgId]: ["room:write"],
+    },
+  })
+
   return (
     <Room roomId={id}>
-    <WorkflowShell
-      workflowId={id}
-      initialGraph={getWorkflowGraph(workflow.graph)}
-      saveGraph={updateWorkflowGraphAction}
-    />
+      <WorkflowShell
+        workflowId={id}
+        initialGraph={getWorkflowGraph(workflow.graph)}
+        saveGraph={updateWorkflowGraphAction}
+      />
     </Room>
   )
 }
