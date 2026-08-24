@@ -6,6 +6,7 @@ import {
   Controls,
   type Edge,
   ReactFlow,
+  Panel,
 } from "@xyflow/react"
 import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow"
 
@@ -14,6 +15,7 @@ import type { StepNodeType } from "@/features/workflows/nodes/nodes-registery"
 import type { WorkflowGraph } from "@/features/workflows/nodes/workflow-graph"
 import { AvoidingEdge } from "./avoiding-edge"
 import { StepNode } from "./step-nodes"
+import {AvatarStack} from "@liveblocks/react-ui"
 
 import "@xyflow/react/dist/style.css";
 import "@liveblocks/react-ui/styles.css";
@@ -75,6 +77,9 @@ export function CanvasFlow({
     >
       <Controls />
       <Cursors />
+      <Panel position="top-right">
+        <AvatarStack />
+      </Panel>
     </ReactFlow>
   )
 }
