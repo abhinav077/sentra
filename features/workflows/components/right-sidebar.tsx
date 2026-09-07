@@ -22,7 +22,6 @@ import { ResizablePanel } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
-
 import {
   nodeRegistry,
   type NodeDefinition,
