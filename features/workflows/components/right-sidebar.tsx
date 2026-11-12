@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { type Edge, useReactFlow, useStoreApi } from "@xyflow/react"
 import { MoreHorizontal, Play, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   Accordion,
@@ -156,12 +158,88 @@ const sections: { kind: StepNodeKind; label: string }[] = [
 // Every node type from the registry, filtered into the groups below.
 const definitions = Object.values(nodeRegistry) as NodeDefinition[]
 
+// Roughly the rendered size of a StepNode, so a new node lands centered on the
+// view rather than with its top-left corner there.
+const NODE_SIZE = { width: 200, height: 52 }
+
+// How far to shift a new node when another already sits at the same spot.
+const STACK_OFFSET = 24
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+// "Open URL 1", "Open URL 2", ... — one past the highest number already used by
+// this type, so titles stay unique even after nodes are deleted. A bare
+// "Open URL" (no number) counts as 1.
+function nextTitle(def: NodeDefinition, nodes: StepNodeType[]) {
+  const pattern = new RegExp(`^${escapeRegExp(def.label)}(?: (\\d+))?$`)
+  const highest = nodes
+    .filter((node) => node.data.type === def.type)
+    .reduce((max, node) => {
+      const match = node.data.title.match(pattern)
+      if (!match) return max
+      return Math.max(max, match[1] ? Number(match[1]) : 1)
+    }, 0)
+  return `${def.label} ${highest + 1}`
+}
+
+// Adds a node of the given type in the middle of the current canvas view.
+// Reads and writes the React Flow store shared through the ReactFlowProvider
+// on the workflow page, so this works from outside the <ReactFlow> component.
+function useAddNode() {
+  const { getNodes, addNodes } = useReactFlow<StepNodeType, Edge>()
+  const store = useStoreApi<StepNodeType, Edge>()
+
+  return (type: NodeType) => {
+    const def: NodeDefinition = nodeRegistry[type]
+    const nodes = getNodes()
+
+    if (
+      def.kind === "trigger" &&
+      nodes.some((n) => n.data.kind === "trigger")
+    ) {
+      toast.error("A workflow can only have one trigger", {
+        description: "Remove the existing trigger to add a different one.",
+      })
+      return
+    }
+
+    // Center of the canvas pane, converted from screen space to flow space.
+    const { width, height, transform } = store.getState()
+    const [tx, ty, zoom] = transform
+    let position = {
+      x: (width / 2 - tx) / zoom - NODE_SIZE.width / 2,
+      y: (height / 2 - ty) / zoom - NODE_SIZE.height / 2,
+    }
+
+    // Repeated clicks without panning would stack nodes exactly; fan them out.
+    const occupied = (p: { x: number; y: number }) =>
+      nodes.some(
+        (n) =>
+          Math.abs(n.position.x - p.x) < 1 && Math.abs(n.position.y - p.y) < 1
+      )
+    while (occupied(position)) {
+      position = { x: position.x + STACK_OFFSET, y: position.y + STACK_OFFSET }
+    }
+
+    addNodes({
+      id: crypto.randomUUID(),
+      type: "step",
+      position,
+      data: {
+        type,
+        kind: def.kind,
+        // There is only ever one trigger, so it needs no number.
+        title: def.kind === "trigger" ? def.label : nextTitle(def, nodes),
+        values: {},
+      },
+    })
+  }
+}
+
 // The Toolbar tab: a button per node type that adds it to the canvas.
 function Palette() {
-  const add = (type: NodeType) => {
-    // TODO: add the clicked node to the canvas (one trigger max).
-    void type
-  }
+  const add = useAddNode()
 
   return (
     <Section title="Toolbar">

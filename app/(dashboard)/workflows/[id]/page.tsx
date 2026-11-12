@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server"
+import { ReactFlowProvider } from "@xyflow/react"
 import { notFound } from "next/navigation"
 
 import { updateWorkflowGraphAction } from "@/features/workflows/action"
@@ -34,13 +35,16 @@ export default async function WorkflowPage({
     },
   })
 
+  // One React Flow store shared by the canvas and the right sidebar's palette.
   return (
-    <Room roomId={id}>
-      <WorkflowShell
-        workflowId={id}
-        initialGraph={getWorkflowGraph(workflow.graph)}
-        saveGraph={updateWorkflowGraphAction}
-      />
-    </Room>
+    <ReactFlowProvider>
+      <Room roomId={id}>
+        <WorkflowShell
+          workflowId={id}
+          initialGraph={getWorkflowGraph(workflow.graph)}
+          saveGraph={updateWorkflowGraphAction}
+        />
+      </Room>
+    </ReactFlowProvider>
   )
 }
