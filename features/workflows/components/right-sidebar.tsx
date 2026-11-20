@@ -1,7 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { type Edge, useReactFlow, useStoreApi } from "@xyflow/react"
+import {
+  type Edge,
+  type ReactFlowState,
+  useReactFlow,
+  useStore,
+  useStoreApi,
+} from "@xyflow/react"
 import { MoreHorizontal, Play, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -328,13 +334,26 @@ function RunButton() {
 // The sidebar itself — header on top, then the Toolbar / Editor tabs.
 // ---------------------------------------------------------------------------
 
+// The node the Editor edits: only when exactly one node is selected. Returns the
+// node object from the store as-is, so the sidebar re-renders only when that
+// node (or the selection) changes, not on every change elsewhere in the graph.
+function selectSelectedNode(state: ReactFlowState) {
+  const selected = state.nodes.filter((node) => node.selected)
+  return selected.length === 1 ? (selected[0] as StepNodeType) : undefined
+}
+
 export function RightSidebar() {
   const [tab, setTab] = useState("toolbar")
 
-  // TODO: read the currently selected node from React Flow.
-  const selected: StepNodeType | undefined = undefined
+  const selected = useStore(selectSelectedNode)
 
-  // TODO: auto-switch to the Editor tab when the selection changes.
+  // Jump to the Editor whenever a different node gets selected. Adjusting state
+  // during render (instead of in an effect) avoids an extra paint on the old tab.
+  const [prevSelectedId, setPrevSelectedId] = useState(selected?.id)
+  if (selected?.id !== prevSelectedId) {
+    setPrevSelectedId(selected?.id)
+    if (selected) setTab("editor")
+  }
 
   return (
     <ResizablePanel
